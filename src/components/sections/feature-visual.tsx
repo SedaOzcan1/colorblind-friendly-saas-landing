@@ -1,29 +1,50 @@
 import type { CSSProperties } from 'react';
-import type { FeatureVisualKind } from '@/content/landing';
+import type { Dictionary, FeatureVisualKind, Lang } from '@/content/i18n';
 import { cn } from '@/lib/cn';
+import { formatPercent } from '@/lib/format';
 import { Icon } from '@/components/ui/icon';
 
+type VisualText = Dictionary['features']['visuals'];
+
 /** Özellik kartlarındaki küçük, dekoratif ürün parçaları. */
-export function FeatureVisual({ kind }: { kind: FeatureVisualKind }) {
+export function FeatureVisual({
+  kind,
+  t,
+  lang,
+}: {
+  kind: FeatureVisualKind;
+  t: VisualText;
+  lang: Lang;
+}) {
   return (
     <div aria-hidden="true" className="mt-6">
-      {kind === 'ab' && <AbVisual />}
-      {kind === 'flags' && <FlagsVisual />}
-      {kind === 'stats' && <StatsVisual />}
-      {kind === 'segments' && <SegmentsVisual />}
-      {kind === 'reports' && <ReportsVisual />}
+      {kind === 'ab' && <AbVisual t={t} lang={lang} />}
+      {kind === 'flags' && <FlagsVisual t={t} lang={lang} />}
+      {kind === 'stats' && <StatsVisual t={t} />}
+      {kind === 'segments' && <SegmentsVisual t={t} />}
+      {kind === 'reports' && <ReportsVisual t={t} />}
     </div>
   );
 }
 
-export function SeriesLegend({ className }: { className?: string }) {
+export function SeriesLegend({
+  a,
+  b,
+  className,
+}: {
+  /** "A — Kontrol" */
+  a: string;
+  /** "B — Varyant" */
+  b: string;
+  className?: string;
+}) {
   return (
     <div className={cn('flex flex-wrap gap-x-4 gap-y-1 mono-label text-muted', className)}>
       <span className="flex items-center gap-1.5">
-        <span className="series-a size-3 rounded-[2px]" /> A — Kontrol
+        <span className="series-a size-3 rounded-[2px]" /> {a}
       </span>
       <span className="flex items-center gap-1.5">
-        <span className="series-b size-3 rounded-[2px]" /> B — Varyant
+        <span className="series-b size-3 rounded-[2px]" /> {b}
       </span>
     </div>
   );
@@ -38,19 +59,14 @@ const days = [
   [41, 71],
   [43, 76],
 ];
-const variants = [
-  { key: 'A', share: 25 },
-  { key: 'B', share: 25 },
-  { key: 'C', share: 25 },
-  { key: 'D', share: 25 },
-];
+const variants = ['A', 'B', 'C', 'D'];
 
-function AbVisual() {
+function AbVisual({ t, lang }: { t: VisualText; lang: Lang }) {
   return (
     <div className="rounded-xl border border-line bg-surface/60 p-4 sm:p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="mono-label text-muted">Günlük dönüşüm · 7 gün</span>
-        <SeriesLegend />
+        <span className="mono-label text-muted">{t.dailyConversion}</span>
+        <SeriesLegend a={t.seriesA} b={t.seriesB} />
       </div>
       <div className="mt-4 flex h-44 items-end gap-2 border-b border-line sm:h-52 sm:gap-3">
         {days.map(([a, b], i) => (
@@ -67,22 +83,21 @@ function AbVisual() {
         ))}
       </div>
       <div className="mt-2 flex justify-between mono-label text-muted">
-        <span>Pzt</span>
-        <span>Paz</span>
+        <span>{t.firstDay}</span>
+        <span>{t.lastDay}</span>
       </div>
       <div className="mt-5 border-t border-dashed border-line pt-4">
-        <span className="mono-label text-muted">Çok değişkenli · trafik dağılımı</span>
+        <span className="mono-label text-muted">{t.multivariate}</span>
         <div className="mt-2 flex h-8 overflow-hidden rounded-md border border-line">
-          {variants.map((v, i) => (
+          {variants.map((key, i) => (
             <span
-              key={v.key}
+              key={key}
               className={cn(
-                'grid place-items-center border-r border-line mono-label last:border-r-0',
+                'grid w-1/4 place-items-center border-r border-line mono-label last:border-r-0',
                 i % 2 === 0 ? 'bg-surface-2' : 'bg-surface',
               )}
-              style={{ width: `${v.share}%` }}
             >
-              {v.key} · %{v.share}
+              {key} · {formatPercent(25, lang)}
             </span>
           ))}
         </div>
@@ -92,19 +107,19 @@ function AbVisual() {
 }
 
 const flags = [
-  { key: 'yeni-odeme-formu', on: true, rollout: '%50' },
-  { key: 'akilli-oneriler', on: true, rollout: '%100' },
-  { key: 'sesli-arama', on: false, rollout: '%0' },
+  { key: 'new-checkout-form', on: true, rollout: 50 },
+  { key: 'smart-suggestions', on: true, rollout: 100 },
+  { key: 'voice-search', on: false, rollout: 0 },
 ];
 
-function FlagsVisual() {
+function FlagsVisual({ t, lang }: { t: VisualText; lang: Lang }) {
   return (
     <ul className="divide-y divide-line rounded-xl border border-line bg-surface/60">
       {flags.map((flag) => (
         <li key={flag.key} className="flex items-center justify-between gap-3 px-4 py-3">
           <span className="min-w-0 truncate font-mono text-sm">{flag.key}</span>
           <span className="flex shrink-0 items-center gap-2">
-            <span className="mono-label text-muted">{flag.rollout}</span>
+            <span className="mono-label text-muted">{formatPercent(flag.rollout, lang)}</span>
             <span
               className={cn(
                 'relative flex h-6 w-11 items-center rounded-full border border-ink p-0.5',
@@ -113,7 +128,7 @@ function FlagsVisual() {
             >
               <span className="size-4 rounded-full border border-ink bg-surface" />
             </span>
-            <span className="w-12 text-right mono-label">{flag.on ? 'Açık' : 'Kapalı'}</span>
+            <span className="w-12 text-right mono-label">{flag.on ? t.on : t.off}</span>
           </span>
         </li>
       ))}
@@ -121,11 +136,11 @@ function FlagsVisual() {
   );
 }
 
-function StatsVisual() {
+function StatsVisual({ t }: { t: VisualText }) {
   return (
     <div className="rounded-xl border border-line bg-surface/60 p-4">
       <div className="flex justify-between mono-label text-muted">
-        <span>Güven aralığı (%95)</span>
+        <span>{t.confidence}</span>
         <span>B − A</span>
       </div>
       <div className="relative mt-6 h-10">
@@ -139,19 +154,17 @@ function StatsVisual() {
       <div className="relative mt-1 h-4 mono-label text-muted">
         <span className="absolute left-[20%] -translate-x-1/2">0</span>
         <span className="absolute left-[32%] -translate-x-1/2">+6</span>
-        <span className="absolute left-[54%] -translate-x-1/2 text-ink">+18,4</span>
+        <span className="absolute left-[54%] -translate-x-1/2 text-ink">{t.liftLabel}</span>
         <span className="absolute left-[78%] -translate-x-1/2">+31</span>
       </div>
     </div>
   );
 }
 
-const segments = ['Ülke: Türkiye', 'Cihaz: Mobil', 'Plan: Ücretsiz', 'Yeni kullanıcı'];
-
-function SegmentsVisual() {
+function SegmentsVisual({ t }: { t: VisualText }) {
   return (
     <div className="flex flex-wrap gap-2">
-      {segments.map((segment, i) => (
+      {t.segments.map((segment, i) => (
         <span
           key={segment}
           className={cn(
@@ -164,21 +177,22 @@ function SegmentsVisual() {
         </span>
       ))}
       <span className="inline-flex items-center gap-1.5 rounded-md border border-dashed border-muted px-3 py-1.5 text-sm text-muted">
-        + Segment ekle
+        {t.addSegment}
       </span>
     </div>
   );
 }
 
-function ReportsVisual() {
+function ReportsVisual({ t }: { t: VisualText }) {
+  const rows = [
+    { cls: 'series-a', w: '64%', label: t.reportRows[0] },
+    { cls: 'series-b', w: '82%', label: t.reportRows[1] },
+  ];
   return (
     <div className="grid gap-4 rounded-xl border border-line bg-surface/60 p-4 sm:grid-cols-[1fr_auto] sm:items-center">
       <div className="space-y-2.5">
-        {[
-          { cls: 'series-a', w: '64%', label: 'A · %4,12' },
-          { cls: 'series-b', w: '82%', label: 'B · %4,88' },
-        ].map((row, i) => (
-          <div key={row.label} className="flex items-center gap-3">
+        {rows.map((row, i) => (
+          <div key={row.cls} className="flex items-center gap-3">
             <div className="h-5 flex-1 overflow-hidden rounded-sm bg-surface-2">
               <div
                 className={`bar-x h-full ${row.cls}`}
@@ -191,13 +205,13 @@ function ReportsVisual() {
       </div>
       <ul className="space-y-1.5 mono-label text-muted sm:border-l sm:border-line sm:pl-4">
         <li className="flex items-center gap-2">
-          <Icon name="contrast" className="size-4 text-ink" /> Renk
+          <Icon name="contrast" className="size-4 text-ink" /> {t.color}
         </li>
         <li className="flex items-center gap-2">
-          <Icon name="pattern" className="size-4 text-ink" /> Desen
+          <Icon name="pattern" className="size-4 text-ink" /> {t.pattern}
         </li>
         <li className="flex items-center gap-2">
-          <Icon name="trophy" className="size-4 text-ink" /> Metin
+          <Icon name="trophy" className="size-4 text-ink" /> {t.text}
         </li>
       </ul>
     </div>

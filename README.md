@@ -11,7 +11,7 @@ Kurgusal bir deney platformu (A/B testleri, özellik bayrakları) için hazırla
 | ![Normal mod, masaüstü](docs/desktop-normal.png) | ![Koyu mod, masaüstü](docs/desktop-dark.png) | ![Renk körlüğüne uygun mod, masaüstü](docs/desktop-color-safe.png) |
 | ![Normal mod, mobil](docs/mobile-normal.png)     | ![Koyu mod, mobil](docs/mobile-dark.png)     | ![Renk körlüğüne uygun mod, mobil](docs/mobile-color-safe.png)     |
 
-Her mod URL ile de açılabilir: `/?theme=normal`, `/?theme=dark`, `/?theme=color-safe` (yalnızca önizleme, kaydedilmez).
+Sayfa Türkçe (`/tr`) ve İngilizce (`/en`) olarak sunulur; kök adres `/tr`'ye yönlenir. Her mod URL ile de açılabilir: `/tr?theme=dark`, `/en?theme=color-safe` gibi (yalnızca önizleme, kaydedilmez).
 
 ## Konsept: laboratuvar deney defteri
 
@@ -74,6 +74,14 @@ Animasyonlar yalnızca `transform` ve `opacity` kullanır. Tek istisna dönen ç
 
 Menüler klavyeyle tam kullanılabilir: mega menü düğmeleri `aria-expanded` kullanır, açılan sütun odak alır; Escape ve dışarı tıklama paneli kapatır.
 
+## Dil desteği (TR / EN)
+
+- **Adresler:** `app/[lang]/` altında `/tr` ve `/en` statik olarak üretilir; tanımsız diller 404 döner. `<html lang>`, canonical, `hreflang` bağlantıları, Open Graph yerel ayarı, sitemap ve JSON-LD dile göre ayarlanır.
+- **Sözlükler:** Bütün metinler `src/content/tr.ts` ve `src/content/en.ts` içindedir. `en.ts` aynı `Dictionary` tipini karşılamak zorundadır; bir metin eksik kalırsa build durur. Ek bir i18n kütüphanesi yoktur.
+- **Bileşenler:** Sunucu bileşenleri sözlüğü doğrudan alır; istemci bileşenlerine yalnızca ihtiyaç duydukları bölüm gönderilir, böylece fazladan JS yüklenmez.
+- **Biçimler:** Sayılar ve yüzdeler dile göre biçimlenir (`%4,12` / `4.12%`, `₺1.490` / `₺1,490`). Form doğrulama mesajları ve API yanıtları da sayfanın dilindedir (`/api/contact?lang=en`).
+- **Geçiş:** Header'da ve mobil menüde "EN / TR" bağlantısı, footer'da dil listesi vardır. Bağlantılar hedef dilin kendi adıyla (`English`, `Türkçe`) ve `lang` özniteliğiyle işaretlenir.
+
 ## Bölümler
 
 Header (mega menü) → Hero (deney sonuç kartı) → Güven şeridi → Rakamlar → 01 Özellikler → 02 Ürün turu (ARIA sekmeleri) → 03 Nasıl çalışır → Entegrasyonlar → 04 Senaryolar → 05 Fiyatlar → 06 Gözlemler (_kurgusal_) → 07 SSS → CTA → 08 İletişim formu → Footer
@@ -103,7 +111,7 @@ npm run dev          # http://localhost:3000
 
 ## Lighthouse
 
-Lighthouse CI üç modu (`?theme=normal`, `?theme=dark`, `?theme=color-safe`) mobil ayarlarla ayrı ayrı ölçer. Eşiğin altında build başarısız olur.
+Lighthouse CI iki dili ve üç modu (toplam altı adres: `/tr` ve `/en`, her biri `?theme=normal|dark|color-safe`) mobil ayarlarla ayrı ayrı ölçer. Eşiğin altında build başarısız olur.
 
 | Kategori       | Hedef | CI eşiği | Yerel ölçüm    |
 | -------------- | ----- | -------- | -------------- |
@@ -118,13 +126,13 @@ Performance hedefi henüz tutmuyor. Gerçek tarayıcıda LCP yaklaşık 0,3 sn, 
 
 ```
 src/
-  app/            layout, page, globals.css (token'lar), api/contact, sitemap, robots, OG görseli
+  app/            [lang]/ (layout, page, OG görseli), globals.css (token'lar), api/contact, sitemap, robots
   components/
     layout/       Header, mod seçici, footer, başa dön
     sections/     Sayfa bölümleri, sonuç kartı, özellik görselleri, ürün maketleri
     contact/      İletişim formu
     ui/           Icon, Button, Reveal, CountUp, Accordion, SpotlightCard, LabTube, SectionHeading …
-  content/        Tüm metinler ve veriler (landing.ts)
+  content/        Sözlükler (tr.ts, en.ts), dil yardımcıları (i18n.ts), site ayarları (site.ts)
   lib/            Tema deposu (theme.ts), tema betiği, Zod şeması
 ```
 

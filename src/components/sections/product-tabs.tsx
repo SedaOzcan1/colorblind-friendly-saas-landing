@@ -1,14 +1,15 @@
 'use client';
 
 import { useRef, useState, type KeyboardEvent } from 'react';
-import { productTabs } from '@/content/landing';
+import type { Dictionary } from '@/content/i18n';
 import { cn } from '@/lib/cn';
 import { Icon } from '@/components/ui/icon';
-import { Em, SectionHeading } from '@/components/ui/section-heading';
+import { SectionHeading, Title } from '@/components/ui/section-heading';
 import { ProductMock } from './product-mocks';
 
 /** WAI-ARIA sekme deseni: ok tuşları, Home / End, otomatik etkinleştirme. */
-export function ProductTabs() {
+export function ProductTabs({ t }: { t: Dictionary['productTour'] }) {
+  const productTabs = t.tabs;
   const [index, setIndex] = useState(0);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const tab = productTabs[index] ?? productTabs[0];
@@ -43,19 +44,15 @@ export function ProductTabs() {
         <SectionHeading
           id="product-title"
           number="02"
-          label="Ürün turu"
-          title={
-            <>
-              Bir deneyin <Em>ömrü,</Em> dört adımda
-            </>
-          }
-          description="Kurulumdan yayına kadar aynı deney defteri. Sekmeler arasında ok tuşlarıyla gezinebilirsiniz."
+          label={t.label}
+          title={<Title parts={t.title} />}
+          description={t.description}
         />
 
         <div className="mt-12">
           <div
             role="tablist"
-            aria-label="Deney adımları"
+            aria-label={t.tablistLabel}
             onKeyDown={onKeyDown}
             className="flex max-w-full gap-1 overflow-x-auto border-b border-line"
           >
@@ -116,7 +113,7 @@ export function ProductTabs() {
             </ul>
           </div>
           <div className="lg:col-span-7">
-            <ProductMock kind={tab.id} />
+            <ProductMock kind={tab.id} t={t.mocks} />
           </div>
         </div>
       </div>

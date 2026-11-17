@@ -4,11 +4,14 @@
       "startServerCommand": "npm run start",
       "startServerReadyPattern": "Ready",
       "url": [
-        "http://localhost:3000/?theme=normal",
-        "http://localhost:3000/?theme=dark",
-        "http://localhost:3000/?theme=color-safe"
+        "http://localhost:3000/tr?theme=normal",
+        "http://localhost:3000/tr?theme=dark",
+        "http://localhost:3000/tr?theme=color-safe",
+        "http://localhost:3000/en?theme=normal",
+        "http://localhost:3000/en?theme=dark",
+        "http://localhost:3000/en?theme=color-safe"
       ],
-      "numberOfRuns": 3
+      "numberOfRuns": 2
     },
     "assert": {
       "assertions": {

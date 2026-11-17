@@ -1,9 +1,9 @@
-import { steps } from '@/content/landing';
+import type { Dictionary } from '@/content/i18n';
 import { Icon } from '@/components/ui/icon';
 import { Reveal } from '@/components/ui/reveal';
-import { Em, SectionHeading } from '@/components/ui/section-heading';
+import { SectionHeading, Title } from '@/components/ui/section-heading';
 
-export function HowItWorks() {
+export function HowItWorks({ t }: { t: Dictionary['howItWorks'] }) {
   return (
     <section
       id="how-it-works"
@@ -14,13 +14,9 @@ export function HowItWorks() {
         <SectionHeading
           id="how-it-works-title"
           number="03"
-          label="Nasıl çalışır"
-          title={
-            <>
-              Hipotezden yayına, <Em>ölçerek.</Em>
-            </>
-          }
-          description="Her adım bir öncekinin sonucunu kullanır. Hiçbir karar ölçümsüz verilmez."
+          label={t.label}
+          title={<Title parts={t.title} />}
+          description={t.description}
         />
 
         <div className="relative mt-16">
@@ -33,7 +29,7 @@ export function HowItWorks() {
           </div>
 
           <ol className="relative grid gap-y-10 sm:grid-cols-2 sm:gap-x-8 lg:grid-cols-4">
-            {steps.map((step, i) => (
+            {t.steps.map((step, i) => (
               <Reveal
                 as="li"
                 key={step.code}
@@ -47,7 +43,7 @@ export function HowItWorks() {
                 />
                 <div className="flex items-center justify-between gap-3">
                   <span className="font-mono text-5xl font-medium tracking-tight text-muted">
-                    <span className="sr-only">Adım </span>
+                    <span className="sr-only">{t.stepPrefix} </span>
                     {step.code}
                   </span>
                   <span className="grid size-11 place-items-center rounded-lg glass">

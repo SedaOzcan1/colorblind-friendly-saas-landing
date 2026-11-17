@@ -1,16 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { plans } from '@/content/landing';
+import type { Dictionary, Lang } from '@/content/i18n';
+import { fill, formatLira } from '@/lib/format';
 import { cn } from '@/lib/cn';
 import { ButtonLink } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { Reveal } from '@/components/ui/reveal';
-import { Em, SectionHeading } from '@/components/ui/section-heading';
+import { SectionHeading, Title } from '@/components/ui/section-heading';
 
-const tl = (n: number) => `₺${new Intl.NumberFormat('tr-TR').format(n)}`;
-
-export function Pricing() {
+export function Pricing({ t, lang }: { t: Dictionary['pricing']; lang: Lang }) {
+  const { plans } = t;
+  const tl = (n: number) => formatLira(n, lang);
   const [yearly, setYearly] = useState(true);
 
   return (
@@ -19,17 +20,13 @@ export function Pricing() {
         <SectionHeading
           id="pricing-title"
           number="05"
-          label="Fiyatlar"
-          title={
-            <>
-              Deney sayısına göre değil, <Em>ölçeğe</Em> göre
-            </>
-          }
-          description="Gizli ücret yok. İstediğiniz zaman yükseltin, düşürün ya da iptal edin."
+          label={t.label}
+          title={<Title parts={t.title} />}
+          description={t.description}
         />
 
         <fieldset className="mt-10 w-fit">
-          <legend className="sr-only">Faturalandırma dönemi</legend>
+          <legend className="sr-only">{t.billingLegend}</legend>
           <div className="relative flex rounded-lg border border-ink bg-surface p-1">
             <span
               aria-hidden="true"
@@ -57,10 +54,10 @@ export function Pricing() {
                     onChange={() => setYearly(period === 'yearly')}
                     className="sr-only"
                   />
-                  {period === 'monthly' ? 'Aylık' : 'Yıllık'}
+                  {period === 'monthly' ? t.monthly : t.yearly}
                   {period === 'yearly' && (
                     <span className="rounded-sm border border-current px-1 mono-label text-[11px]">
-                      -%20
+                      {t.yearlyDiscount}
                     </span>
                   )}
                 </label>
@@ -92,7 +89,9 @@ export function Pricing() {
                       {plan.badge}
                     </span>
                   )}
-                  <p className="mono-label text-muted">PLAN · 0{i + 1}</p>
+                  <p className="mono-label text-muted">
+                    {t.planLabel} · 0{i + 1}
+                  </p>
                   <h3
                     id={`plan-${plan.id}`}
                     className="mt-2 font-display text-2xl font-bold tracking-tight"
@@ -108,14 +107,14 @@ export function Pricing() {
                     >
                       {tl(price)}
                     </span>
-                    {price > 0 && <span className="text-sm text-muted">/ ay + KDV</span>}
+                    {price > 0 && <span className="text-sm text-muted">{t.perMonth}</span>}
                   </p>
                   <p className="mt-2 min-h-5 text-sm text-muted">
                     {price === 0
-                      ? 'Sonsuza dek ücretsiz'
+                      ? t.foreverFree
                       : yearly
-                        ? `Yıllık faturalandırılır · yılda ${tl((plan.monthly - price) * 12)} tasarruf`
-                        : 'Aylık faturalandırılır'}
+                        ? fill(t.billedYearly, { amount: tl((plan.monthly - price) * 12) })
+                        : t.billedMonthly}
                   </p>
 
                   <ButtonLink
@@ -139,9 +138,7 @@ export function Pricing() {
             );
           })}
         </ul>
-        <p className="mt-10 mono-label text-muted">
-          Tüm planlarda veri kontrolü sizde. İstediğiniz zaman iptal edin.
-        </p>
+        <p className="mt-10 mono-label text-muted">{t.footnote}</p>
       </div>
     </section>
   );

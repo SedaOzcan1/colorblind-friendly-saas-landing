@@ -1,18 +1,28 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { megaMenu, navLinks, type MegaGroupId } from '@/content/landing';
+import type { Dictionary, Lang, MegaGroupId } from '@/content/i18n';
 import { cn } from '@/lib/cn';
 import { ButtonLink } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { Logo } from '@/components/ui/logo';
+import { LanguageSwitch } from './language-switch';
 import { MegaMenu } from './mega-menu';
 import { ThemeSwitcher } from './theme-switcher';
 
 const navItem =
   'relative flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium transition-colors';
 
-export function Header() {
+export function Header({
+  t,
+  common,
+  lang,
+}: {
+  t: Dictionary['header'];
+  common: Dictionary['common'];
+  lang: Lang;
+}) {
+  const { navLinks, megaMenu } = t;
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState('');
@@ -43,7 +53,7 @@ export function Header() {
     );
     sections.forEach((section) => io.observe(section));
     return () => io.disconnect();
-  }, []);
+  }, [navLinks]);
 
   // Mobil menü: Escape ile kapanır, masaüstü genişliğe geçince kapanır
   useEffect(() => {
@@ -99,9 +109,9 @@ export function Header() {
       )}
     >
       <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between gap-4 px-4 sm:px-6 xl:px-0">
-        <Logo />
+        <Logo label={common.logoLabel} />
 
-        <nav aria-label="Ana menü" className="hidden lg:block">
+        <nav aria-label={t.mainNav} className="hidden lg:block">
           <ul className="flex items-center gap-0.5">
             {megaMenu.groups.map((g) => {
               const expanded = mega === g.id;
@@ -145,27 +155,33 @@ export function Header() {
                     : 'text-muted after:scale-x-0 hover:text-ink',
                 )}
               >
-                Fiyatlar
+                {t.pricing}
               </a>
             </li>
           </ul>
         </nav>
 
         <div className="flex items-center gap-2">
-          <ThemeSwitcher compact className="hidden lg:block" />
+          <ThemeSwitcher t={t.themeSwitcher} compact className="hidden lg:block" />
+          <LanguageSwitch
+            lang={lang}
+            label={t.switchLanguage.label}
+            name={t.switchLanguage.name}
+            className="hidden lg:grid"
+          />
           <ButtonLink
             href="#contact"
             size="sm"
             className="hidden sm:inline-flex lg:hidden xl:inline-flex"
           >
-            Demo isteyin
+            {t.cta}
           </ButtonLink>
           <button
             ref={menuButtonRef}
             type="button"
             aria-expanded={open}
             aria-controls="mobile-menu"
-            aria-label={open ? 'Menüyü kapat' : 'Menüyü aç'}
+            aria-label={open ? t.closeMenu : t.openMenu}
             onClick={() => setOpen((o) => !o)}
             className="relative grid size-11 place-items-center rounded-md hover:bg-ink/5 lg:hidden"
           >
@@ -197,6 +213,8 @@ export function Header() {
         open={mega !== null}
         group={mega}
         active={active}
+        menu={megaMenu}
+        closeLabel={common.close}
         onClose={() => {
           if (mega) megaTriggerRefs.current[mega]?.focus();
           setMega(null);
@@ -210,12 +228,12 @@ export function Header() {
         hidden={!open}
         className="absolute inset-x-3 top-full mt-2 max-h-[calc(100dvh-5.5rem)] animate-pop overflow-y-auto rounded-[18px] border border-line bg-surface shadow-[0_12px_35px_rgb(13_5_26/0.16)] sm:inset-x-auto sm:right-6 sm:w-[22rem] lg:hidden"
       >
-        <nav aria-label="Mobil menü" className="p-3">
+        <nav aria-label={t.mobileNav} className="p-3">
           <div className="flex items-center justify-between py-1 pr-1 pl-3">
-            <p className="text-[0.95rem] font-semibold">Keşfedin</p>
+            <p className="text-[0.95rem] font-semibold">{t.explore}</p>
             <button
               type="button"
-              aria-label="Kapat"
+              aria-label={common.close}
               onClick={() => {
                 setOpen(false);
                 menuButtonRef.current?.focus();
@@ -228,7 +246,7 @@ export function Header() {
           <ul className="mt-1 space-y-1">
             {navLinks.map((link, i) => {
               const isActive = active === link.href.slice(1);
-              const descId = `mobil-aciklama-${i}`;
+              const descId = `mobile-desc-${i}`;
               return (
                 <li
                   key={link.href}
@@ -259,9 +277,18 @@ export function Header() {
             })}
           </ul>
           <div className="mt-3 space-y-3 border-t border-line px-1 pt-4 pb-1">
-            <ThemeSwitcher />
+            <div className="flex items-stretch gap-2">
+              <ThemeSwitcher t={t.themeSwitcher} className="flex-1" />
+              <LanguageSwitch
+                lang={lang}
+                label={t.switchLanguage.label}
+                name={t.switchLanguage.name}
+                className="h-auto"
+                onNavigate={() => setOpen(false)}
+              />
+            </div>
             <ButtonLink href="#contact" onClick={() => setOpen(false)} className="w-full">
-              Demo isteyin
+              {t.cta}
             </ButtonLink>
           </div>
         </nav>

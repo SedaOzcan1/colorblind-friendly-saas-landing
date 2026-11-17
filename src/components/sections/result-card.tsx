@@ -1,18 +1,17 @@
 import type { CSSProperties } from 'react';
-import { heroResult } from '@/content/landing';
+import type { Dictionary, Lang } from '@/content/i18n';
+import { formatPercent } from '@/lib/format';
 import { CountUp } from '@/components/ui/count-up';
 import { Icon } from '@/components/ui/icon';
 import { Reveal } from '@/components/ui/reveal';
-
-const pct = (n: number, decimals = 1) =>
-  n.toLocaleString('tr-TR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 
 /**
  * Hero'daki deney sonuç kartı. Kazanan, renge ek olarak ikon + metinle
  * belirtilir; B serisi renk körlüğüne uygun modda taralıdır (.series-b).
  */
-export function ResultCard() {
-  const r = heroResult;
+export function ResultCard({ t: r, lang }: { t: Dictionary['result']; lang: Lang }) {
+  /* Yüzde işareti Türkçede önde, İngilizcede sonda */
+  const pctAffix = lang === 'tr' ? { prefix: '%', suffix: '' } : { prefix: '', suffix: '%' };
   return (
     <Reveal variant="scale" delay={150}>
       <figure className="relative rounded-2xl glass p-5 sm:p-6" aria-labelledby="result-title">
@@ -20,14 +19,14 @@ export function ResultCard() {
           <span className="mono-label text-muted">{r.id}</span>
           <span className="inline-flex items-center gap-1.5 rounded-sm border border-ink px-2 py-0.5 mono-label">
             <Icon name="check" className="size-3.5" />
-            Tamamlandı
+            {r.completed}
           </span>
         </div>
         <p id="result-title" className="mt-3 font-display text-xl leading-tight font-bold">
           {r.name}
         </p>
         <p className="mt-2 mono-label text-muted">
-          <CountUp to={r.sample} prefix="N = " /> katılımcı · 14 gün
+          <CountUp to={r.sample} prefix={r.samplePrefix} lang={lang} /> {r.sampleSuffix}
         </p>
 
         <div className="mt-6 space-y-4">
@@ -45,11 +44,13 @@ export function ResultCard() {
                     {winner && (
                       <span className="inline-flex items-center gap-1 mono-label text-ink">
                         <Icon name="trophy" className="size-3.5" />
-                        Kazanan
+                        {r.winnerBadge}
                       </span>
                     )}
                   </span>
-                  <span className="font-mono text-sm tabular-nums">%{pct(v.rate, 2)}</span>
+                  <span className="font-mono text-sm tabular-nums">
+                    {formatPercent(v.rate, lang, 2)}
+                  </span>
                 </div>
                 <div className="mt-1.5 h-7 overflow-hidden rounded-sm bg-surface-2">
                   <div
@@ -65,19 +66,25 @@ export function ResultCard() {
         <figcaption className="mt-6 border-t border-dashed border-line pt-5">
           <p className="flex items-center gap-2 font-display text-2xl font-extrabold tracking-tight">
             <Icon name="trophy" className="size-6 shrink-0 text-brand" />
-            Varyant B kazandı
+            {r.winnerTitle}
           </p>
           <dl className="mt-4 grid grid-cols-2 gap-3">
             <div className="rounded-lg bg-surface-2/70 p-3">
-              <dt className="mono-label text-muted">Dönüşüm</dt>
+              <dt className="mono-label text-muted">{r.conversion}</dt>
               <dd className="mt-1 font-mono text-2xl font-medium tabular-nums">
-                <CountUp to={r.lift} decimals={1} prefix="+%" />
+                <CountUp
+                  to={r.lift}
+                  decimals={1}
+                  prefix={`+${pctAffix.prefix}`}
+                  suffix={pctAffix.suffix}
+                  lang={lang}
+                />
               </dd>
             </div>
             <div className="rounded-lg bg-surface-2/70 p-3">
-              <dt className="mono-label text-muted">Anlamlılık</dt>
+              <dt className="mono-label text-muted">{r.significance}</dt>
               <dd className="mt-1 font-mono text-2xl font-medium tabular-nums">
-                <CountUp to={r.significance} prefix="%" />
+                <CountUp to={r.significanceValue} {...pctAffix} lang={lang} />
               </dd>
             </div>
           </dl>
@@ -88,7 +95,7 @@ export function ResultCard() {
           aria-hidden="true"
           className="absolute -top-3.5 right-6 rotate-3 rounded-sm bg-highlight px-2.5 py-1 mono-label text-on-highlight shadow-sm"
         >
-          p &lt; 0,03
+          {r.sticker}
         </span>
       </figure>
     </Reveal>

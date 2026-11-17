@@ -1,6 +1,7 @@
 import { ImageResponse } from 'next/og';
+import { getDictionary, isLang, LANGS, DEFAULT_LANG } from '@/content/i18n';
 
-export const alt = 'Test — Her fikri test et. Kanıtlanmışı büyüt.';
+export const alt = 'Test';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -11,7 +12,13 @@ const ink = '#15131C';
 const brand = '#4F35E8';
 const lime = '#D9F45A';
 
-export default function OpengraphImage() {
+export function generateStaticParams() {
+  return LANGS.map((lang) => ({ lang }));
+}
+
+export default async function OpengraphImage({ params }: { params: Promise<{ lang: string }> }) {
+  const { lang } = await params;
+  const { og } = getDictionary(isLang(lang) ? lang : DEFAULT_LANG).meta;
   return new ImageResponse(
     <div
       style={{
@@ -31,8 +38,8 @@ export default function OpengraphImage() {
       <div
         style={{ display: 'flex', justifyContent: 'space-between', fontSize: 26, letterSpacing: 2 }}
       >
-        <span>DENEY #01</span>
-        <span>N = 12.480</span>
+        <span>{lang === 'en' ? 'EXPERIMENT #01' : 'DENEY #01'}</span>
+        <span>{lang === 'en' ? 'N = 12,480' : 'N = 12.480'}</span>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         <div
@@ -47,7 +54,7 @@ export default function OpengraphImage() {
           test<span style={{ color: brand }}>.</span>
         </div>
         <div style={{ display: 'flex', fontSize: 64, fontWeight: 700, marginTop: 12 }}>
-          Her fikri test et.
+          {og.title}
         </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 20, fontSize: 30 }}>
@@ -59,9 +66,9 @@ export default function OpengraphImage() {
             padding: '6px 16px',
           }}
         >
-          Varyant B +%18,4
+          {lang === 'en' ? 'Variant B +18.4%' : 'Varyant B +%18,4'}
         </span>
-        <span>A/B testleri · feature flag · istatistik</span>
+        <span>{og.tagline}</span>
       </div>
     </div>,
     size,

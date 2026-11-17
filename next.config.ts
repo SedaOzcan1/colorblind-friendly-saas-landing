@@ -4,6 +4,10 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   images: { formats: ['image/avif', 'image/webp'] },
+  // Kök adres varsayılan dile (tr) gider; ?theme= gibi sorgu parametreleri korunur
+  async redirects() {
+    return [{ source: '/', destination: '/tr', permanent: false }];
+  },
   async headers() {
     return [
       {

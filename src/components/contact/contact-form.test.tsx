@@ -1,6 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
+import { en } from '@/content/en';
+import { tr } from '@/content/tr';
 import { ContactForm } from './contact-form';
 
 async function fillValidForm(user: UserEvent) {
@@ -26,7 +28,7 @@ describe('ContactForm', () => {
   it('boş gönderimde alan hatalarını gösterir ve isteği göndermez', async () => {
     const user = userEvent.setup();
     const fetchSpy = vi.spyOn(globalThis, 'fetch');
-    render(<ContactForm />);
+    render(<ContactForm lang="tr" t={tr.contact.form} />);
 
     await user.click(screen.getByRole('button', { name: /Mesajı gönder/ }));
 
@@ -42,7 +44,7 @@ describe('ContactForm', () => {
 
   it('geçersiz e-postayı yakalar', async () => {
     const user = userEvent.setup();
-    render(<ContactForm />);
+    render(<ContactForm lang="tr" t={tr.contact.form} />);
 
     await user.type(screen.getByLabelText('E-posta'), 'elif@');
     await user.tab();
@@ -53,14 +55,14 @@ describe('ContactForm', () => {
   it('geçerli formu gönderir ve başarı mesajını gösterir', async () => {
     const user = userEvent.setup();
     const fetchSpy = mockFetch(true, { ok: true, message: 'Teşekkürler Elif! Mesajınız alındı.' });
-    render(<ContactForm />);
+    render(<ContactForm lang="tr" t={tr.contact.form} />);
 
     await fillValidForm(user);
     await user.click(screen.getByRole('button', { name: /Mesajı gönder/ }));
 
     expect(await screen.findByText('Teşekkürler Elif! Mesajınız alındı.')).toBeInTheDocument();
     expect(fetchSpy).toHaveBeenCalledWith(
-      '/api/contact',
+      '/api/contact?lang=tr',
       expect.objectContaining({ method: 'POST' }),
     );
     const sent = JSON.parse(fetchSpy.mock.calls[0]![1]!.body as string);
@@ -77,11 +79,33 @@ describe('ContactForm', () => {
   it('sunucu hatasında erişilebilir bir uyarı gösterir', async () => {
     const user = userEvent.setup();
     mockFetch(false, { ok: false, error: 'Sunucuya şu an ulaşılamıyor.' });
-    render(<ContactForm />);
+    render(<ContactForm lang="tr" t={tr.contact.form} />);
 
     await fillValidForm(user);
     await user.click(screen.getByRole('button', { name: /Mesajı gönder/ }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Sunucuya şu an ulaşılamıyor.');
+  });
+
+  it('İngilizce sayfada hata mesajları ve istek dili İngilizcedir', async () => {
+    const user = userEvent.setup();
+    const fetchSpy = mockFetch(true, { ok: true, message: 'Thank you, Elif!' });
+    render(<ContactForm lang="en" t={en.contact.form} />);
+
+    await user.click(screen.getByRole('button', { name: /Send message/ }));
+    expect(await screen.findByText('Enter a valid email address.')).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText('Full name'), 'Elif Kaya');
+    await user.type(screen.getByLabelText('Email'), 'elif@example.com');
+    await user.selectOptions(screen.getByLabelText('Topic'), 'demo');
+    await user.type(
+      screen.getByLabelText('Your message'),
+      'We would like to schedule a demo call.',
+    );
+    await user.click(screen.getByLabelText(/I agree/));
+    await user.click(screen.getByRole('button', { name: /Send message/ }));
+
+    expect(await screen.findByText('Thank you, Elif!')).toBeInTheDocument();
+    expect(fetchSpy).toHaveBeenCalledWith('/api/contact?lang=en', expect.anything());
   });
 });

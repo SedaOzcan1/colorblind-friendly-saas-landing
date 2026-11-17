@@ -48,3 +48,15 @@ export function SectionHeading({
 export function Em({ children }: { children: ReactNode }) {
   return <em className="accent-word">{children}</em>;
 }
+
+export type TitleParts = { before: string; em: string; after: string };
+
+/** Sözlükteki { before, em, after } başlığını vurgu kelimesiyle çizer */
+export function Title({ parts }: { parts: TitleParts }) {
+  return (
+    <>
+      {parts.before} <Em>{parts.em}</Em>
+      {parts.after && ` ${parts.after}`}
+    </>
+  );
+}

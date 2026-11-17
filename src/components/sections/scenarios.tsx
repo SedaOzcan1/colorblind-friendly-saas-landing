@@ -1,18 +1,19 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { scenarios } from '@/content/landing';
+import type { Dictionary } from '@/content/i18n';
 import { cn } from '@/lib/cn';
 import { prefersReducedMotion } from '@/lib/theme';
 import { Icon } from '@/components/ui/icon';
-import { Em, SectionHeading } from '@/components/ui/section-heading';
+import { SectionHeading, Title } from '@/components/ui/section-heading';
 
 /**
  * Deney senaryoları (Figma: "Sizin hedefiniz, sizin hikâyeniz.").
  * Yerel kaydırma (scroll-snap) ile parmakla kaydırılır; oklar bir kart ilerletir.
  * Konum ekran okuyucuya "1 / 3" olarak duyurulur.
  */
-export function Scenarios() {
+export function Scenarios({ t }: { t: Dictionary['scenarios'] }) {
+  const scenarios = t.items;
   const [index, setIndex] = useState(0);
   const trackRef = useRef<HTMLUListElement>(null);
   const last = scenarios.length - 1;
@@ -40,26 +41,22 @@ export function Scenarios() {
         <SectionHeading
           id="scenarios-title"
           number="04"
-          label="Senaryolar"
-          title={
-            <>
-              Sizin hedefiniz, sizin <Em>hikâyeniz.</Em>
-            </>
-          }
-          description="Kurgusal ama gerçekçi deneyler: hipotez, yöntem ve ölçülen sonuç."
+          label={t.label}
+          title={<Title parts={t.title} />}
+          description={t.description}
         />
 
         <ul
           ref={trackRef}
           onScroll={onScroll}
           tabIndex={0}
-          aria-label="Deney senaryoları"
+          aria-label={t.listLabel}
           className="mt-12 flex snap-x snap-mandatory [scrollbar-width:none] gap-5 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden"
         >
           {scenarios.map((s, i) => (
             <li
               key={s.tag}
-              aria-roledescription="senaryo"
+              aria-roledescription={t.itemRole}
               aria-label={`${i + 1} / ${scenarios.length}: ${s.title}`}
               className="w-full shrink-0 snap-start"
             >
@@ -92,7 +89,7 @@ export function Scenarios() {
 
         <div className="mt-5 flex items-center justify-between gap-4">
           <p className="flex items-center gap-2 mono-label text-muted">
-            <span aria-hidden="true">← →</span> Kaydırın veya oklarla keşfedin
+            <span aria-hidden="true">← →</span> {t.hint}
             <span aria-hidden="true">·</span>
             <span aria-live="polite">
               {index + 1} / {scenarios.length}
@@ -101,7 +98,7 @@ export function Scenarios() {
           <div className="flex gap-2">
             <button
               type="button"
-              aria-label="Önceki senaryo"
+              aria-label={t.previous}
               disabled={index === 0}
               onClick={() => goTo(index - 1)}
               className={cn(arrow)}
@@ -110,7 +107,7 @@ export function Scenarios() {
             </button>
             <button
               type="button"
-              aria-label="Sonraki senaryo"
+              aria-label={t.next}
               disabled={index === last}
               onClick={() => goTo(index + 1)}
               className={cn(arrow)}

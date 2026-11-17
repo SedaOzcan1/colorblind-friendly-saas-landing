@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { LOCALES, type Lang } from '@/content/i18n';
 import { prefersReducedMotion } from '@/lib/theme';
 
 type CountUpProps = {
@@ -9,6 +10,8 @@ type CountUpProps = {
   prefix?: string;
   suffix?: string;
   duration?: number;
+  /** Sayı biçimi dili (binlik ve ondalık ayırıcı) */
+  lang?: Lang;
 };
 
 /**
@@ -21,17 +24,18 @@ export function CountUp({
   prefix = '',
   suffix = '',
   duration = 1600,
+  lang = 'tr',
 }: CountUpProps) {
   const ref = useRef<HTMLSpanElement>(null);
   const format = (n: number) =>
-    `${prefix}${n.toLocaleString('tr-TR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}${suffix}`;
+    `${prefix}${n.toLocaleString(LOCALES[lang], { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}${suffix}`;
   const final = format(to);
 
   useEffect(() => {
     const el = ref.current;
     if (!el || prefersReducedMotion()) return;
     const fmt = (n: number) =>
-      `${prefix}${n.toLocaleString('tr-TR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}${suffix}`;
+      `${prefix}${n.toLocaleString(LOCALES[lang], { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}${suffix}`;
 
     let raf = 0;
     const io = new IntersectionObserver(([entry]) => {
@@ -51,7 +55,7 @@ export function CountUp({
       io.disconnect();
       cancelAnimationFrame(raf);
     };
-  }, [to, decimals, prefix, suffix, duration]);
+  }, [to, decimals, prefix, suffix, duration, lang]);
 
   return (
     <>

@@ -9,13 +9,9 @@ export function Wordmark({ className }: { className?: string }) {
   );
 }
 
-export function Logo() {
+export function Logo({ label }: { label: string }) {
   return (
-    <a
-      href="#top"
-      className="flex items-baseline rounded-md"
-      aria-label="Test, sayfanın başına git"
-    >
+    <a href="#top" className="flex items-baseline rounded-md" aria-label={label}>
       <Wordmark className="text-[1.75rem] leading-none" />
     </a>
   );

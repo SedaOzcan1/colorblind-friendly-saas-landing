@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { cn } from '@/lib/cn';
 import { Icon } from '@/components/ui/icon';
 
-export function BackToTop() {
+export function BackToTop({ label }: { label: string }) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -16,7 +16,7 @@ export function BackToTop() {
   return (
     <a
       href="#top"
-      aria-label="Sayfanın başına dön"
+      aria-label={label}
       tabIndex={visible ? 0 : -1}
       aria-hidden={visible ? undefined : true}
       className={cn(

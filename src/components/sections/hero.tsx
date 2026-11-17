@@ -1,10 +1,18 @@
-import { hero } from '@/content/landing';
+import type { Dictionary, Lang } from '@/content/i18n';
 import { ButtonLink } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { LabTube } from '@/components/ui/lab-tube';
 import { ResultCard } from './result-card';
 
-export function Hero() {
+export function Hero({
+  t: hero,
+  result,
+  lang,
+}: {
+  t: Dictionary['hero'];
+  result: Dictionary['result'];
+  lang: Lang;
+}) {
   // Döngünün kesintisiz olması için ilk kelime sona tekrar eklenir
   const loop = [...hero.words, hero.words[0]];
 
@@ -12,7 +20,7 @@ export function Hero() {
     <section
       id="top"
       aria-labelledby="hero-title"
-      className="relative pt-10 pb-16 sm:pt-16 lg:pt-20 lg:pb-24"
+      className="relative overflow-x-clip pt-10 pb-16 sm:pt-16 lg:pt-20 lg:pb-24"
     >
       <div className="mx-auto grid max-w-[1200px] items-center gap-14 px-4 sm:px-6 lg:grid-cols-12 lg:gap-8 xl:px-0">
         <div className="lg:col-span-7">
@@ -81,7 +89,7 @@ export function Hero() {
             className="absolute -right-2 -bottom-10 hidden h-48 w-12 sm:block lg:-right-6"
           />
           <div className="relative mx-auto max-w-md lg:max-w-none">
-            <ResultCard />
+            <ResultCard t={result} lang={lang} />
           </div>
         </div>
       </div>

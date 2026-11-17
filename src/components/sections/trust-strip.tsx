@@ -1,20 +1,26 @@
 'use client';
 
 import { useState } from 'react';
-import { teams } from '@/content/landing';
+import type { Dictionary } from '@/content/i18n';
 import { MarqueeControl } from '@/components/ui/marquee-control';
 
 /** Güven şeridi: kurgusal ekip adları, deney etiketi biçiminde. */
-export function TrustStrip() {
+export function TrustStrip({ t, fictional }: { t: Dictionary['trust']; fictional: string }) {
+  const { teams } = t;
   const [paused, setPaused] = useState(false);
 
   return (
     <section aria-labelledby="teams-title" className="border-y border-line bg-canvas/60 py-6">
       <div className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-3 px-4 sm:px-6 xl:px-0">
         <h2 id="teams-title" className="mono-label text-muted">
-          Deney yapan ekipler <span className="normal-case">(kurgusal)</span>
+          {t.title} <span className="normal-case">({fictional})</span>
         </h2>
-        <MarqueeControl paused={paused} onToggle={() => setPaused((p) => !p)} label="Şeridi" />
+        <MarqueeControl
+          paused={paused}
+          onToggle={() => setPaused((p) => !p)}
+          pauseLabel={t.pause}
+          playLabel={t.play}
+        />
       </div>
       <div className="marquee mt-5 mask-x" data-paused={paused}>
         <div className="marquee-track flex w-max animate-marquee [--marquee-duration:40s]">

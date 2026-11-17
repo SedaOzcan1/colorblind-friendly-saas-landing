@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { siteConfig } from '@/content/landing';
+import { siteConfig } from '@/content/site';
 
 export default function robots(): MetadataRoute.Robots {
   return {

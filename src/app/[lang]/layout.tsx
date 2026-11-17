@@ -1,11 +1,13 @@
 import type { Metadata, Viewport } from 'next';
 import { Bricolage_Grotesque, DM_Sans, Instrument_Serif, JetBrains_Mono } from 'next/font/google';
-import { siteConfig } from '@/content/landing';
+import { notFound } from 'next/navigation';
+import { DEFAULT_LANG, getDictionary, isLang, LANGS } from '@/content/i18n';
+import { siteConfig } from '@/content/site';
 import { themeScript } from '@/lib/theme-script';
 import { BackToTop } from '@/components/layout/back-to-top';
 import { Footer } from '@/components/layout/footer';
 import { Header } from '@/components/layout/header';
-import './globals.css';
+import '../globals.css';
 
 // latin-ext: Türkçe karakterler (ğ, ş, ı, İ) için gerekli
 const display = Bricolage_Grotesque({
@@ -35,35 +37,43 @@ const mono = JetBrains_Mono({
   preload: false,
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteConfig.url),
-  title: { default: siteConfig.title, template: '%s · Test' },
-  description: siteConfig.description,
-  applicationName: siteConfig.name,
-  keywords: [
-    'A/B testi',
-    'özellik bayrakları',
-    'deney platformu',
-    'feature flag',
-    'ürün analitiği',
-    'SaaS',
-  ],
-  alternates: { canonical: '/' },
-  openGraph: {
-    type: 'website',
-    locale: 'tr_TR',
-    url: '/',
-    siteName: siteConfig.name,
-    title: siteConfig.title,
-    description: siteConfig.description,
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: siteConfig.title,
-    description: siteConfig.description,
-  },
-  robots: { index: true, follow: true },
-};
+export function generateStaticParams() {
+  return LANGS.map((lang) => ({ lang }));
+}
+
+// Yalnızca tanımlı diller: /de gibi adresler 404 döner
+export const dynamicParams = false;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  if (!isLang(lang)) return {};
+  const { meta } = getDictionary(lang);
+  return {
+    metadataBase: new URL(siteConfig.url),
+    title: { default: meta.title, template: '%s · Test' },
+    description: meta.description,
+    applicationName: siteConfig.name,
+    keywords: meta.keywords,
+    alternates: {
+      canonical: `/${lang}`,
+      languages: { tr: '/tr', en: '/en', 'x-default': `/${DEFAULT_LANG}` },
+    },
+    openGraph: {
+      type: 'website',
+      locale: meta.ogLocale,
+      url: `/${lang}`,
+      siteName: siteConfig.name,
+      title: meta.title,
+      description: meta.description,
+    },
+    twitter: { card: 'summary_large_image', title: meta.title, description: meta.description },
+    robots: { index: true, follow: true },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: [
@@ -73,10 +83,17 @@ export const viewport: Viewport = {
   colorScheme: 'light dark',
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({
+  children,
+  params,
+}: Readonly<{ children: React.ReactNode; params: Promise<{ lang: string }> }>) {
+  const { lang } = await params;
+  if (!isLang(lang)) notFound();
+  const t = getDictionary(lang);
+
   return (
     <html
-      lang="tr"
+      lang={lang}
       className={`${display.variable} ${serif.variable} ${sans.variable} ${mono.variable}`}
       suppressHydrationWarning
     >
@@ -92,14 +109,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:rounded-lg focus:bg-brand focus:px-5 focus:py-2.5 focus:font-semibold focus:text-on-brand"
         >
-          İçeriğe atla
+          {t.common.skipToContent}
         </a>
-        <Header />
+        <Header t={t.header} common={t.common} lang={lang} />
         <main id="main" tabIndex={-1}>
           {children}
         </main>
-        <Footer />
-        <BackToTop />
+        <Footer t={t.footer} lang={lang} />
+        <BackToTop label={t.common.backToTop} />
       </body>
     </html>
   );

@@ -1,12 +1,15 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { cn } from '@/lib/cn';
-import { contactSchema, TOPIC_LABELS, TOPICS, type ContactInput } from '@/lib/contact-schema';
+import type { Dictionary, Lang } from '@/content/i18n';
+import { createContactSchema, TOPICS, type ContactInput } from '@/lib/contact-schema';
 import { buttonClasses } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
+
+type FormText = Dictionary['contact']['form'];
 
 type Status =
   { type: 'idle' } | { type: 'success'; message: string } | { type: 'error'; message: string };
@@ -19,19 +22,21 @@ function Field({
   label,
   error,
   optional,
+  t,
   children,
 }: {
   id: string;
   label: string;
   error?: string;
   optional?: boolean;
+  t: FormText;
   children: ReactNode;
 }) {
   return (
     <div>
       <label htmlFor={id} className="mb-1.5 block text-sm font-semibold">
         {label}
-        {optional && <span className="font-normal text-muted"> (isteğe bağlı)</span>}
+        {optional && <span className="font-normal text-muted"> {t.optional}</span>}
       </label>
       {children}
       {error && (
@@ -40,7 +45,7 @@ function Field({
           className="mt-1.5 flex items-center gap-1.5 text-sm font-medium text-ink"
         >
           <Icon name="alert" className="size-4 shrink-0" />
-          <span className="sr-only">Hata: </span>
+          <span className="sr-only">{t.errorPrefix} </span>
           {error}
         </p>
       )}
@@ -48,15 +53,16 @@ function Field({
   );
 }
 
-export function ContactForm() {
+export function ContactForm({ lang, t }: { lang: Lang; t: FormText }) {
   const [status, setStatus] = useState<Status>({ type: 'idle' });
+  const schema = useMemo(() => createContactSchema(t.validation), [t.validation]);
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
   } = useForm<ContactInput>({
-    resolver: zodResolver(contactSchema),
+    resolver: zodResolver(schema),
     defaultValues: { name: '', email: '', company: '', message: '', consent: false, website: '' },
     mode: 'onTouched',
   });
@@ -66,19 +72,19 @@ export function ContactForm() {
   const onSubmit = async (data: ContactInput) => {
     setStatus({ type: 'idle' });
     try {
-      const res = await fetch('/api/contact', {
+      const res = await fetch(`/api/contact?lang=${lang}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
       const json = (await res.json().catch(() => ({}))) as { message?: string; error?: string };
-      if (!res.ok) throw new Error(json.error ?? 'Mesajınız gönderilemedi. Lütfen tekrar deneyin.');
-      setStatus({ type: 'success', message: json.message ?? 'Mesajınız alındı.' });
+      if (!res.ok) throw new Error(json.error ?? t.fallbackError);
+      setStatus({ type: 'success', message: json.message ?? t.fallbackSuccess });
       reset();
     } catch (err) {
       setStatus({
         type: 'error',
-        message: err instanceof Error ? err.message : 'Beklenmeyen bir hata oluştu.',
+        message: err instanceof Error ? err.message : t.unexpectedError,
       });
     }
   };
@@ -88,10 +94,10 @@ export function ContactForm() {
       onSubmit={handleSubmit(onSubmit)}
       noValidate
       className="space-y-5"
-      aria-label="İletişim formu"
+      aria-label={t.ariaLabel}
     >
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field id="name" label="Ad soyad" error={errors.name?.message}>
+        <Field id="name" label={t.name} error={errors.name?.message} t={t}>
           <input
             id="name"
             type="text"
@@ -102,7 +108,7 @@ export function ContactForm() {
             {...register('name')}
           />
         </Field>
-        <Field id="email" label="E-posta" error={errors.email?.message}>
+        <Field id="email" label={t.email} error={errors.email?.message} t={t}>
           <input
             id="email"
             type="email"
@@ -117,7 +123,7 @@ export function ContactForm() {
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field id="company" label="Şirket" optional error={errors.company?.message}>
+        <Field id="company" label={t.company} optional error={errors.company?.message} t={t}>
           <input
             id="company"
             type="text"
@@ -128,7 +134,7 @@ export function ContactForm() {
             {...register('company')}
           />
         </Field>
-        <Field id="topic" label="Konu" error={errors.topic?.message}>
+        <Field id="topic" label={t.topic} error={errors.topic?.message} t={t}>
           <select
             id="topic"
             aria-invalid={errors.topic ? true : undefined}
@@ -143,17 +149,17 @@ export function ContactForm() {
             }}
             {...register('topic')}
           >
-            <option value="">Bir konu seçin</option>
+            <option value="">{t.topicPlaceholder}</option>
             {TOPICS.map((topic) => (
               <option key={topic} value={topic}>
-                {TOPIC_LABELS[topic]}
+                {t.topics[topic]}
               </option>
             ))}
           </select>
         </Field>
       </div>
 
-      <Field id="message" label="Mesajınız" error={errors.message?.message}>
+      <Field id="message" label={t.message} error={errors.message?.message} t={t}>
         <textarea
           id="message"
           rows={5}
@@ -166,7 +172,7 @@ export function ContactForm() {
 
       {/* Bal küpü: botlar doldurur, kullanıcılar görmez */}
       <div className="hidden" aria-hidden="true">
-        <label htmlFor="website">Web siteniz</label>
+        <label htmlFor="website">{t.honeypot}</label>
         <input id="website" type="text" tabIndex={-1} autoComplete="off" {...register('website')} />
       </div>
 
@@ -181,7 +187,7 @@ export function ContactForm() {
             {...register('consent')}
           />
           <label htmlFor="consent" className="cursor-pointer text-sm text-muted">
-            Kişisel verilerimin, talebime yanıt verilmesi amacıyla işlenmesini kabul ediyorum.
+            {t.consent}
           </label>
         </div>
         {errors.consent && (
@@ -190,7 +196,7 @@ export function ContactForm() {
             className="mt-1.5 flex items-center gap-1.5 text-sm font-medium text-ink"
           >
             <Icon name="alert" className="size-4 shrink-0" />
-            <span className="sr-only">Hata: </span>
+            <span className="sr-only">{t.errorPrefix} </span>
             {errors.consent.message}
           </p>
         )}
@@ -207,11 +213,11 @@ export function ContactForm() {
               aria-hidden="true"
               className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent"
             />
-            Gönderiliyor…
+            {t.submitting}
           </>
         ) : (
           <>
-            Mesajı gönder
+            {t.submit}
             <Icon name="arrowRight" className="size-4" />
           </>
         )}
@@ -222,7 +228,7 @@ export function ContactForm() {
           <p className="flex animate-pop items-center gap-2 rounded-lg border border-l-4 border-ink border-l-brand bg-surface px-4 py-3 text-sm font-medium text-ink">
             <Icon name="checkCircle" className="size-5 shrink-0 text-brand" />
             <span>
-              <strong className="font-semibold">Gönderildi: </strong>
+              <strong className="font-semibold">{t.successTitle} </strong>
               {status.message}
             </span>
           </p>
@@ -235,7 +241,7 @@ export function ContactForm() {
         >
           <Icon name="alert" className="size-5 shrink-0" />
           <span>
-            <strong className="font-semibold">Gönderilemedi: </strong>
+            <strong className="font-semibold">{t.failureTitle} </strong>
             {status.message}
           </span>
         </p>

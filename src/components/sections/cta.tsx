@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import type { Dictionary } from '@/content/i18n';
 import { Icon } from '@/components/ui/icon';
 import { LabTube } from '@/components/ui/lab-tube';
 import { Reveal } from '@/components/ui/reveal';
@@ -11,7 +12,7 @@ const tubeColors = {
 } as CSSProperties;
 
 /** Figma'daki marka renkli CTA bloğu + deney defterinin cam tüp rafı. */
-export function Cta() {
+export function Cta({ t }: { t: Dictionary['cta'] }) {
   return (
     <section aria-labelledby="cta-title" className="py-12">
       <div className="mx-auto max-w-[1200px] px-4 sm:px-6 xl:px-0">
@@ -30,31 +31,28 @@ export function Cta() {
             </div>
 
             <div className="relative max-w-xl">
-              <p className="mono-label">DENEY #02 · Sizin sıranız</p>
+              <p className="mono-label">{t.eyebrow}</p>
               <h2
                 id="cta-title"
                 className="mt-4 font-display text-4xl leading-[1] font-extrabold tracking-[-0.035em] text-balance sm:text-6xl"
               >
-                Bir sonraki fikriniz{' '}
-                <em className="font-serif font-normal tracking-[-0.01em] italic">kanıtlansın.</em>
+                {t.titleBefore}{' '}
+                <em className="font-serif font-normal tracking-[-0.01em] italic">{t.titleEm}</em>
               </h2>
-              <p className="mt-5 text-lg text-pretty">
-                14 gün boyunca Büyüme planını ücretsiz deneyin. SDK kurulumu bir öğleden sonra,
-                kredi kartı gerekmez.
-              </p>
+              <p className="mt-5 text-lg text-pretty">{t.description}</p>
               <div className="mt-9 flex flex-col gap-4 sm:flex-row">
                 <a
                   href="#contact"
                   className="inline-flex h-13 items-center justify-center gap-2 rounded-lg border border-ink bg-surface px-6 font-semibold text-ink shadow-[3px_3px_0_var(--ink)] transition-[transform,box-shadow] hover:-translate-x-px hover:-translate-y-px hover:shadow-[5px_5px_0_var(--ink)]"
                 >
-                  İlk deneyi kurun
+                  {t.primary}
                   <Icon name="arrowRight" className="size-4" />
                 </a>
                 <a
                   href="#pricing"
                   className="inline-flex h-13 items-center justify-center rounded-lg border border-current px-6 font-semibold transition-colors hover:bg-on-brand/10"
                 >
-                  Planları görün
+                  {t.secondary}
                 </a>
               </div>
             </div>

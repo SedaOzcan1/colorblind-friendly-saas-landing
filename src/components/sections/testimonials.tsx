@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { testimonials } from '@/content/landing';
+import type { Dictionary } from '@/content/i18n';
 import { cn } from '@/lib/cn';
 import { MarqueeControl } from '@/components/ui/marquee-control';
-import { Em, SectionHeading } from '@/components/ui/section-heading';
+import { SectionHeading, Title } from '@/components/ui/section-heading';
 
-type Testimonial = (typeof testimonials)[number];
+type Testimonial = Dictionary['testimonials']['items'][number];
 
 const initials = (name: string) =>
   name
@@ -14,10 +14,20 @@ const initials = (name: string) =>
     .map((part) => part[0])
     .join('');
 
-function TestimonialCard({ t, index }: { t: Testimonial; index: number }) {
+function TestimonialCard({
+  t,
+  index,
+  cardLabel,
+}: {
+  t: Testimonial;
+  index: number;
+  cardLabel: string;
+}) {
   return (
     <figure className="flex h-full flex-col rounded-xl border border-line bg-surface p-6">
-      <span className="mono-label text-muted">GÖZLEM #{String(index + 1).padStart(2, '0')}</span>
+      <span className="mono-label text-muted">
+        {cardLabel} #{String(index + 1).padStart(2, '0')}
+      </span>
       <blockquote className="mt-3 flex-1 font-display text-lg leading-snug font-bold tracking-tight text-pretty">
         <p>“{t.quote}”</p>
       </blockquote>
@@ -37,7 +47,8 @@ function TestimonialCard({ t, index }: { t: Testimonial; index: number }) {
   );
 }
 
-export function Testimonials() {
+export function Testimonials({ t: text }: { t: Dictionary['testimonials'] }) {
+  const testimonials = text.items;
   const [paused, setPaused] = useState(false);
   const rows = [testimonials.slice(0, 4), testimonials.slice(4)];
 
@@ -51,16 +62,17 @@ export function Testimonials() {
         <SectionHeading
           id="testimonials-title"
           number="06"
-          label="Gözlemler"
-          title={
-            <>
-              Ekipler ne <Em>gözlemledi?</Em>
-            </>
-          }
-          description="Not: Bu yorumlar ve kişiler kurgusaldır; tasarım demosu için yazılmıştır."
+          label={text.label}
+          title={<Title parts={text.title} />}
+          description={text.description}
         />
         <div className="mt-8">
-          <MarqueeControl paused={paused} onToggle={() => setPaused((p) => !p)} label="Yorumları" />
+          <MarqueeControl
+            paused={paused}
+            onToggle={() => setPaused((p) => !p)}
+            pauseLabel={text.pause}
+            playLabel={text.play}
+          />
         </div>
       </div>
 
@@ -81,7 +93,7 @@ export function Testimonials() {
                 >
                   {row.map((t, i) => (
                     <li key={t.name} className="w-[18.5rem] shrink-0 sm:w-[23rem]">
-                      <TestimonialCard t={t} index={r * 4 + i} />
+                      <TestimonialCard t={t} index={r * 4 + i} cardLabel={text.cardLabel} />
                     </li>
                   ))}
                 </ul>

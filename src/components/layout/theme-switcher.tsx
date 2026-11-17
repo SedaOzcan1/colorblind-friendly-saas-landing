@@ -3,12 +3,15 @@
 import { useId, useRef, type ChangeEvent, type PointerEvent } from 'react';
 import { changeTheme, isTheme, useTheme, type Theme } from '@/lib/theme';
 import { cn } from '@/lib/cn';
+import type { Dictionary } from '@/content/i18n';
 import { Icon, type IconName } from '@/components/ui/icon';
 
-const options: { value: Theme; label: string; icon: IconName }[] = [
-  { value: 'normal', label: 'Normal', icon: 'sun' },
-  { value: 'dark', label: 'Koyu', icon: 'moon' },
-  { value: 'color-safe', label: 'Renk körlüğüne uygun', icon: 'eye' },
+type SwitcherText = Dictionary['header']['themeSwitcher'];
+
+const options: { value: Theme; key: keyof SwitcherText; icon: IconName }[] = [
+  { value: 'normal', key: 'normal', icon: 'sun' },
+  { value: 'dark', key: 'dark', icon: 'moon' },
+  { value: 'color-safe', key: 'colorSafe', icon: 'eye' },
 ];
 
 /**
@@ -18,9 +21,11 @@ const options: { value: Theme; label: string; icon: IconName }[] = [
  * (globals.css → .mode-option); böylece hidrasyondan önce de doğru görünür.
  */
 export function ThemeSwitcher({
+  t,
   className,
   compact = false,
 }: {
+  t: SwitcherText;
   className?: string;
   compact?: boolean;
 }) {
@@ -47,7 +52,7 @@ export function ThemeSwitcher({
 
   return (
     <fieldset className={cn('min-w-0', className)}>
-      <legend className="sr-only">Görünüm modu</legend>
+      <legend className="sr-only">{t.legend}</legend>
       <div className="flex rounded-lg border border-line bg-surface/70 p-0.5">
         {options.map((option) => (
           <label
@@ -69,7 +74,7 @@ export function ThemeSwitcher({
               className="sr-only"
             />
             <Icon name={option.icon} className="size-4 shrink-0" />
-            {option.label}
+            {t[option.key]}
           </label>
         ))}
       </div>

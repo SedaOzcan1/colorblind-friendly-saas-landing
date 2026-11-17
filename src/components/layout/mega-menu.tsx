@@ -1,6 +1,6 @@
 'use client';
 
-import { megaMenu, type MegaGroupId } from '@/content/landing';
+import type { Dictionary, MegaGroupId } from '@/content/i18n';
 import { cn } from '@/lib/cn';
 import { Icon } from '@/components/ui/icon';
 
@@ -13,9 +13,13 @@ export function MegaMenu({
   open,
   group,
   active,
+  menu: megaMenu,
+  closeLabel,
   onClose,
   onNavigate,
 }: {
+  menu: Dictionary['header']['megaMenu'];
+  closeLabel: string;
   open: boolean;
   group: MegaGroupId | null;
   /** Görünen bölümün id'si; o bölüme giden öğeler vurgulanır */
@@ -34,7 +38,7 @@ export function MegaMenu({
           <p className="font-display text-xl font-bold tracking-tight">{megaMenu.title}</p>
           <button
             type="button"
-            aria-label="Kapat"
+            aria-label={closeLabel}
             onClick={onClose}
             className="grid size-11 place-items-center rounded-lg text-muted hover:bg-ink/5 hover:text-ink"
           >
