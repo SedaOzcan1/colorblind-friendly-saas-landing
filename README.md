@@ -72,15 +72,7 @@ Laboratuvar camı kartlar · kaydırınca beliren içerik · count-up sayaçlar 
 
 Animasyonlar yalnızca `transform` ve `opacity` kullanır. Tek istisna dönen çerçevedeki `--angle` özelliği. Hepsi `prefers-reduced-motion` tercihine uyar; bu tercihte kayan şeritler elle kaydırılabilir listeye dönüşür.
 
-## Figma ile birleştirme
-
-Ayrı bir Figma taslağındaki yapı, deney defteri görsel diliyle birleştirildi. Renkler ve yazı tipleri her yerde projedeki token'lardan gelir.
-
-- **Mobil menü:** Başlıklı ("Keşfedin") kart panel, kapatma düğmesi, açıklamalı öğeler, aktif bölüm vurgusu.
-- **Masaüstü mega menü:** Ürün / Çözümler / Kaynaklar düğmeleri ve üç sütunlu panel. Düğmeler `aria-expanded` kullanır, açan sütun odak alır, Escape ve dışarı tıklama paneli kapatır.
-- **Yeni bölümler:** Entegrasyonlar ("Sevdiğiniz araçlar, aynı masada.") ve deney senaryoları. Senaryolar kaydırılarak ve oklarla gezilir.
-- **Düzen:** "Nasıl çalışır" tam genişlikte, marka renginin açık tonunda bir bant içinde. SSS iki sütunlu, CTA marka renkli blok, footer Ürün / Keşfedin / İletişim sütunlu. Planlar Başlangıç / Büyüme / Ölçek, hero rozeti hap biçiminde.
-- **Bilerek alınmayanlar:** Ortalanmış hero + dashboard maketi, eşit üç kart ve tek yazı tipi (Inter). Bunlar şablon görünümünden kaçınma kurallarıyla çelişiyor.
+Menüler klavyeyle tam kullanılabilir: mega menü düğmeleri `aria-expanded` kullanır, açılan sütun odak alır; Escape ve dışarı tıklama paneli kapatır.
 
 ## Bölümler
 
